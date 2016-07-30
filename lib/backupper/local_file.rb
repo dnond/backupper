@@ -1,5 +1,3 @@
-require_relative 'zip_file_generator'
-
 module Backupper
   class LocalFile
     def archive(local_dir_name)
@@ -19,21 +17,26 @@ module Backupper
     end
 
     def clean_workdir
-      FileUtils.rm_rf(work_dir) if File.exist? work_dir
+      remove_dir = File.dirname(work_dir)
+      FileUtils.rm_rf(remove_dir) if File.exist? remove_dir
 
-      archived_file_name = "#{File.dirname(work_dir)}/#{File.basename(work_dir)}.zip"
-      FileUtils.rm(archived_file_name) if File.exist? archived_file_name
+      # archived_file_name = archived_dir_file_name(work_dir)
+      # FileUtils.rm(archived_file_name) if File.exist? archived_file_name
 
       FileUtils.mkdir_p(work_dir)
     end
 
     def archive_dir(dir, archived_file = nil)
-      archived_file = "#{File.dirname(dir)}/#{File.basename(dir)}.tar.gz" if archived_file.nil?
+      archived_file = archived_dir_file_name(dir) if archived_file.nil?
       `tar cvzf #{archived_file} -C #{File.dirname(dir)} #{File.basename(dir)}`
       archived_file
     end
 
     private
+
+    def archived_dir_file_name(dir)
+      "#{File.dirname(dir)}/#{File.basename(dir)}.tar.gz"
+    end
 
     def work_dir
       "#{::Backupper::WORKDIR}/#{Date.today.strftime('%Y-%m-%d')}"
